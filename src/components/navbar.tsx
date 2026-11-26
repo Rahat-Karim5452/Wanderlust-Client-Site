@@ -11,14 +11,15 @@ import { cn } from "@/lib/utils"
 
 const primaryLinks = [
   { label: "Home", href: "/" },
-  { label: "Destinations", href: "#destinations" },
-  { label: "My Bookings", href: "#bookings" },
-  { label: "Admin", href: "#admin" },
+  { label: "Destinations", href: "/destinations" },
+  { label: "Add-Destination", href: "/add-destination" },
+  { label: "My Bookings", href: "/bookings" },
+  { label: "Admin", href: "/admin" },
 ]
 
 const accountLinks = [
-  { label: "Login", href: "#login" },
-  { label: "Sign Up", href: "#signup" },
+  { label: "Login", href: "/login" },
+  { label: "Sign Up", href: "/signup" },
 ]
 
 export function Navbar() {

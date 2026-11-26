@@ -10,17 +10,19 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Commands
 
-- Use npm (`package-lock.json` is the only lockfile).
-- `npm run dev` / `npm run build` / `npm run start` wrap Next 16 (Turbopack). `next build` runs TypeScript but **not** ESLint here — run lint separately.
-- `npm run lint` = flat-config ESLint; `npm run typecheck` = `tsc --noEmit`; `npm run format` rewrites only `**/*.{ts,tsx}` with Prettier + Tailwind class sorting.
-- No test script, test framework, or CI workflow is checked in; lint + typecheck + build are the available checks.
-- Baseline: `npm run lint` currently fails on checked-in shadcn code (`react-hooks/set-state-in-effect` in `src/components/ui/carousel.tsx` and `src/hooks/use-mobile.ts`); don't assume your edit caused it.
+- Use npm only (`package-lock.json` is the lockfile).
+- `npm run dev` / `npm run build` / `npm run start` wrap Next 16 with Turbopack. `next build` type-checks but does **not** run ESLint — run lint separately.
+- `npm run lint` = flat-config ESLint over the repo; `npm run typecheck` = `tsc --noEmit`; `npm run format` rewrites only `**/*.{ts,tsx}` with Prettier (no semicolons, double quotes, LF) plus Tailwind class sorting for `cn`/`cva`.
+- No tests, test runner, or CI workflow is checked in. lint + typecheck + build are the available checks.
+- Baseline `npm run lint` exits 1 on vendored shadcn code: `react-hooks/set-state-in-effect` in `src/components/ui/carousel.tsx` and `src/hooks/use-mobile.ts`. Treat those two as pre-existing and fix anything else it reports.
 
 ## Structure and conventions
 
-- Source lives under `src/`; `@/*` resolves to `src/*` (`tsconfig.json`). App Router only: `src/app/layout.tsx` is the root wrapper, `src/app/page.tsx` is currently the only route.
-- `ThemeProvider` is client-side and wraps the app with class-based dark mode (`.dark`) plus a global `d` toggle hotkey; `suppressHydrationWarning` in the layout is intentional for `next-themes`.
-- Tailwind v4 comes through `@tailwindcss/postcss`; there is no `tailwind.config.*`. Tokens live in `src/app/globals.css` as oklch CSS variables.
-- shadcn/ui uses `base-nova`, RSC + TSX, CSS variables, and lucide icons; `components.json` defines the aliases. `src/components/ui/` already contains ~60 preinstalled components; add missing ones with `npx shadcn@latest add <name>`.
-- `src/lib/utils.ts` only re-exports `cn` from the `cn` package; don't add a local clsx/tailwind-merge implementation.
-- Shiki highlighting is custom: register new languages/aliases in `src/lib/highlighter.tsx`; `src/hooks/use-highlighted-code.ts` streams via GrammarState. Unlisted languages render as plain text.
+- App Router under `src/app`: `/` (`page.tsx`) and `/add-destination` (stub). `layout.tsx` wraps every route and already renders `Navbar` + `Footer` inside `ThemeProvider`; pages should render only their own sections, not the shared chrome.
+- `@/*` resolves to `src/*` (`tsconfig.json`).
+- Images live in `src/assets/**` and are imported as modules (`import banner from "@/assets/Banner.png"`) for `next/image`; `public/` is empty. `next.config.ts` has no `images.remotePatterns`, so remote image URLs need config first.
+- `src/components/ui/` is the shadcn `base-nova` set (~60 files) built on **Base UI** (`@base-ui/react`), not Radix. Use those primitives; add missing ones with `npx shadcn@latest add <name>`. Avoid editing vendored components unless the change is meant for the whole app.
+- `cn` comes from the `cn` npm package, re-exported by `src/lib/utils.ts`. UI files import `cn` from `"cn"`; app components import `@/lib/utils`. Don't add a local clsx/tailwind-merge implementation.
+- Theme: client-side `next-themes` with class-based dark mode and a global `d` hotkey (ignored while typing); `suppressHydrationWarning` on `<html>` is intentional.
+- Styling: Tailwind v4 via `@tailwindcss/postcss`, no `tailwind.config.*`. Tokens in `src/app/globals.css` include `brand` (`#15a1bf`), `ink` (`#0c0b0b`), and `banner-muted` (`#edfcff`); prefer `text-brand` / `bg-brand` etc. Merriweather is applied as a className on `<html>` in `layout.tsx`.
+- Shiki highlighting is opt-in: languages/aliases must be registered in `src/lib/highlighter.tsx`; `src/hooks/use-highlighted-code.ts` streams via `GrammarState`. Unregistered languages render as plain text. `src/components/ui/code-block.tsx` is presentational and does not highlight on its own.

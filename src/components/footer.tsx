@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { ArrowUpRight } from "lucide-react"
 
-import wordmark from "@/assets/Wanderlast-1.png"
+import wordmark from "@/assets/Wanderlust-1.png"
 
 const quickLinks = [
   { label: "Home", href: "/" },

@@ -6,7 +6,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Menu, User, X } from "lucide-react"
 
-import logo from "@/assets/Wanderlast.png"
+import logo from "@/assets/Wanderlust.png"
 import { cn } from "@/lib/utils"
 
 const primaryLinks = [

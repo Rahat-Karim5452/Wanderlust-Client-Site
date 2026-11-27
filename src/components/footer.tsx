@@ -6,7 +6,7 @@ import wordmark from "@/assets/Wanderlust-1.png"
 
 const quickLinks = [
   { label: "Home", href: "/" },
-  { label: "Destinations", href: "#destinations" },
+  { label: "Destinations", href: "/destinations" },
   { label: "My Bookings", href: "#bookings" },
   { label: "My Profile", href: "#profile" },
 ]
@@ -136,10 +136,10 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:info@wanderland.com"
+                  href="mailto:info@wanderlust.com"
                   className="transition-colors hover:text-white"
                 >
-                  info@wanderland.com
+                  info@wanderlust.com
                 </a>
               </li>
             </ul>

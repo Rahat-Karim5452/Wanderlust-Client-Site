@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -16,40 +15,11 @@ import {
 
 import type { Destination } from "@/types/destination"
 import { formatPrice } from "@/lib/destinations"
-import { DestinationActions } from "@/components/destinations/destination-actions"
+
+import EditDestinationDialog from "@/components/destinations/edit-destination-dialog"
+import DeleteDestinationDialog from "@/components/destinations/delete-destination-dialog"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
-
-async function getDestination(id: string): Promise<Destination | null> {
-  try {
-    const res = await fetch(`${API_URL}/destination/${id}`, {
-      cache: "no-store",
-    })
-
-    if (!res.ok) return null
-
-    const data = await res.json()
-    return data.destination ?? data
-  } catch (error) {
-    console.error("Failed to load destination:", error)
-    return null
-  }
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}): Promise<Metadata> {
-  const { id } = await params
-  const destination = await getDestination(id)
-
-  return {
-    title: destination
-      ? `${destination.name} | Wanderlust`
-      : "Destination Details | Wanderlust",
-  }
-}
 
 const DestinationDetailsPage = async ({
   params,
@@ -57,9 +27,15 @@ const DestinationDetailsPage = async ({
   params: Promise<{ id: string }>
 }) => {
   const { id } = await params
-  const destination = await getDestination(id)
 
-  if (!destination) notFound()
+  const res = await fetch(`${API_URL}/destination/${id}`, {
+    cache: "no-store",
+  })
+
+  if (!res.ok) notFound()
+
+  const result = await res.json()
+  const destination: Destination = result.destination ?? result
 
   const {
     _id,
@@ -74,29 +50,29 @@ const DestinationDetailsPage = async ({
   } = destination
 
   return (
-    <main className="relative isolate overflow-hidden bg-[#f5fafc] text-[#0c0b0b]">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-32 -left-40 size-[30rem] rounded-full bg-[radial-gradient(closest-side,rgba(21,161,191,0.14),transparent)]" />
-        <div className="absolute top-40 -right-40 size-[34rem] rounded-full bg-[radial-gradient(closest-side,rgba(21,161,191,0.10),transparent)]" />
-      </div>
+    <main className="relative isolate min-h-screen overflow-hidden bg-[#f5fafc] text-[#0c0b0b]">
+      <div className="pointer-events-none absolute -top-40 -left-40 size-[450px] rounded-full bg-[radial-gradient(closest-side,rgba(21,161,191,0.12),transparent)]" />
 
-      <div className="relative mx-auto w-full max-w-7xl px-4 pt-7 pb-16 sm:px-6 lg:px-8 lg:pt-10 lg:pb-24">
+      <div className="relative mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8 lg:py-10">
         {/* Navigation and Actions */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <Link
             href="/destinations"
-            className="group inline-flex items-center gap-2 text-sm font-medium text-[#64757a] transition-colors hover:text-brand"
+            className="group flex items-center gap-2 text-sm font-medium text-[#64757a] transition-colors hover:text-brand"
           >
             <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-1" />
             Back to destinations
           </Link>
 
-          <DestinationActions id={String(_id)} />
+          <div className="flex items-center gap-2">
+            <EditDestinationDialog destination={destination} />
+            <DeleteDestinationDialog />
+          </div>
         </div>
 
         {/* Hero Image */}
         <section className="relative overflow-hidden rounded-3xl bg-[#dff4f9] shadow-[0_24px_60px_-35px_rgba(12,11,11,0.35)]">
-          <div className="relative aspect-[16/8] min-h-[240px] sm:min-h-[360px] lg:aspect-[16/7]">
+          <div className="relative aspect-[16/8] min-h-[260px] sm:min-h-[360px] lg:aspect-[16/7]">
             {imageUrl ? (
               <Image
                 src={imageUrl}
@@ -112,18 +88,18 @@ const DestinationDetailsPage = async ({
               </div>
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-            <div className="absolute right-5 bottom-5 left-5 sm:right-9 sm:bottom-9 sm:left-9">
-              <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-3.5 py-1.5 text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md">
+            <div className="absolute right-6 bottom-6 left-6 sm:bottom-10 sm:left-10">
+              <span className="inline-flex rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-semibold tracking-wider text-white uppercase backdrop-blur-md">
                 {category}
               </span>
 
-              <h1 className="mt-3 max-w-3xl font-heading text-4xl leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="mt-3 font-heading text-4xl tracking-tight text-white sm:text-5xl lg:text-6xl">
                 {name}
               </h1>
 
-              <p className="mt-2 flex items-center gap-2 text-sm text-white/85 sm:text-base">
+              <p className="mt-3 flex items-center gap-2 text-sm text-white/85 sm:text-base">
                 <MapPin className="size-4" />
                 {country}
               </p>
@@ -132,44 +108,45 @@ const DestinationDetailsPage = async ({
         </section>
 
         {/* Main Content */}
-        <div className="mt-8 grid items-start gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
-          {/* Destination Information */}
+        <div className="mt-9 grid items-start gap-9 lg:grid-cols-[1fr_360px] lg:gap-12">
+          {/* Left Content */}
           <div className="min-w-0">
             {/* Quick Information */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-4 border-b border-black/5 pb-6">
-              <div className="flex items-center gap-2">
-                <span className="grid size-10 place-items-center rounded-xl bg-[#eff9fc] text-brand">
-                  <Compass className="size-5" />
-                </span>
-                <div>
-                  <p className="text-[11px] text-[#8a999e]">Category</p>
-                  <p className="text-sm font-semibold">{category}</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-4 border-b border-black/5 pb-7 sm:grid-cols-3">
+              {[
+                {
+                  icon: Compass,
+                  label: "Category",
+                  value: category,
+                },
+                {
+                  icon: Clock3,
+                  label: "Duration",
+                  value: duration,
+                },
+                {
+                  icon: CalendarDays,
+                  label: "Departure",
+                  value: departure,
+                },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-3">
+                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand shadow-sm ring-1 ring-black/5">
+                    <item.icon className="size-5" />
+                  </div>
 
-              <div className="flex items-center gap-2">
-                <span className="grid size-10 place-items-center rounded-xl bg-[#eff9fc] text-brand">
-                  <Clock3 className="size-5" />
-                </span>
-                <div>
-                  <p className="text-[11px] text-[#8a999e]">Duration</p>
-                  <p className="text-sm font-semibold">{duration}</p>
+                  <div className="min-w-0">
+                    <p className="text-xs text-[#8a999e]">{item.label}</p>
+                    <p className="mt-1 truncate text-sm font-semibold">
+                      {item.value}
+                    </p>
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="grid size-10 place-items-center rounded-xl bg-[#eff9fc] text-brand">
-                  <CalendarDays className="size-5" />
-                </span>
-                <div>
-                  <p className="text-[11px] text-[#8a999e]">Departure</p>
-                  <p className="text-sm font-semibold">{departure}</p>
-                </div>
-              </div>
+              ))}
             </div>
 
             {/* Overview */}
-            <section className="mt-8">
+            <section className="mt-9">
               <div className="flex items-center gap-3">
                 <span className="h-7 w-1 rounded-full bg-brand" />
                 <h2 className="font-heading text-2xl tracking-tight">
@@ -183,31 +160,31 @@ const DestinationDetailsPage = async ({
             </section>
 
             {/* Experience */}
-            <section className="mt-9 rounded-2xl border border-brand/10 bg-white p-5 shadow-[0_12px_35px_-28px_rgba(12,11,11,0.3)] sm:p-7">
+            <section className="mt-9 rounded-2xl border border-brand/10 bg-white p-6 shadow-sm sm:p-8">
               <div className="flex items-center gap-3">
-                <span className="grid size-10 place-items-center rounded-xl bg-[#eff9fc] text-brand">
+                <div className="grid size-11 place-items-center rounded-xl bg-[#eff9fc] text-brand">
                   <Sparkles className="size-5" />
-                </span>
+                </div>
 
                 <div>
                   <h2 className="font-heading text-xl">
                     Your Journey Starts Here
                   </h2>
-                  <p className="mt-0.5 text-xs text-[#8a999e]">
+                  <p className="mt-1 text-xs text-[#8a999e]">
                     Discover something extraordinary
                   </p>
                 </div>
               </div>
 
-              <p className="mt-4 text-sm leading-7 text-[#64757a]">
+              <p className="mt-5 text-sm leading-7 text-[#64757a]">
                 Explore this destination and discover the experiences waiting
-                for you. Plan your journey, enjoy new surroundings, and create
-                unforgettable travel memories.
+                for you. Enjoy new surroundings and create unforgettable travel
+                memories.
               </p>
             </section>
 
             {/* Travel Benefits */}
-            <section className="mt-9">
+            <section className="mt-10">
               <h2 className="font-heading text-2xl tracking-tight">
                 Travel with Confidence
               </h2>
@@ -236,9 +213,9 @@ const DestinationDetailsPage = async ({
                   >
                     <item.icon className="size-6 text-brand" />
 
-                    <h3 className="mt-3 text-sm font-semibold">{item.title}</h3>
+                    <h3 className="mt-4 text-sm font-semibold">{item.title}</h3>
 
-                    <p className="mt-1 text-xs leading-5 text-[#819095]">
+                    <p className="mt-2 text-xs leading-5 text-[#819095]">
                       {item.text}
                     </p>
                   </div>
@@ -250,35 +227,27 @@ const DestinationDetailsPage = async ({
           {/* Booking Card */}
           <aside className="lg:sticky lg:top-8">
             <div className="overflow-hidden rounded-3xl border border-black/5 bg-white shadow-[0_20px_55px_-30px_rgba(12,11,11,0.25)]">
-              {/* Price */}
               <div className="bg-gradient-to-br from-[#effaff] to-white p-6 sm:p-7">
-                <p className="text-xs font-medium tracking-widest text-[#819095] uppercase">
+                <p className="text-xs font-semibold tracking-widest text-[#819095] uppercase">
                   Starting from
                 </p>
 
-                <div className="mt-2">
-                  <span className="text-4xl font-bold tracking-tight text-brand">
-                    {formatPrice(price)}
-                  </span>
-                </div>
+                <p className="mt-2 text-4xl font-bold tracking-tight text-brand">
+                  {formatPrice(price)}
+                </p>
 
                 <p className="mt-1 text-xs text-[#819095]">Per person</p>
 
-                <div className="mt-6 h-px bg-brand/10" />
+                <div className="my-6 h-px bg-brand/10" />
 
-                {/* Trip Details */}
-                <div className="mt-5 space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <p className="text-xs font-medium text-[#819095]">
-                      Destination
-                    </p>
+                    <p className="text-xs text-[#819095]">Destination</p>
                     <p className="mt-1 text-sm font-semibold">{name}</p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium text-[#819095]">
-                      Travel date
-                    </p>
+                    <p className="text-xs text-[#819095]">Travel date</p>
                     <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
                       <CalendarDays className="size-4 text-brand" />
                       {departure}
@@ -286,9 +255,7 @@ const DestinationDetailsPage = async ({
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium text-[#819095]">
-                      Trip duration
-                    </p>
+                    <p className="text-xs text-[#819095]">Trip duration</p>
                     <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
                       <Clock3 className="size-4 text-brand" />
                       {duration}
@@ -296,8 +263,7 @@ const DestinationDetailsPage = async ({
                   </div>
                 </div>
 
-                {/* Benefits */}
-                <div className="mt-6 space-y-3">
+                <div className="mt-7 space-y-3">
                   {[
                     "Destination details available",
                     "Transparent package pricing",
@@ -307,7 +273,7 @@ const DestinationDetailsPage = async ({
                       key={benefit}
                       className="flex items-center gap-2 text-xs text-[#64757a]"
                     >
-                      <Check className="size-4 shrink-0 text-emerald-500" />
+                      <Check className="size-4 text-emerald-500" />
                       {benefit}
                     </div>
                   ))}
@@ -318,7 +284,7 @@ const DestinationDetailsPage = async ({
               <div className="border-t border-black/5 p-6">
                 <Link
                   href={`/booking/${_id}`}
-                  className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(21,161,191,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#1290ab] hover:shadow-lg"
+                  className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(21,161,191,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#1290ab]"
                 >
                   Book Now
                   <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />

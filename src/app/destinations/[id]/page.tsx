@@ -66,7 +66,7 @@ const DestinationDetailsPage = async ({
 
           <div className="flex items-center gap-2">
             <EditDestinationDialog destination={destination} />
-            <DeleteDestinationDialog />
+            <DeleteDestinationDialog destination={destination} />
           </div>
         </div>
 

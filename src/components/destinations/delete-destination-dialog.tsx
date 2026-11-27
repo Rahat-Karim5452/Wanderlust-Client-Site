@@ -1,6 +1,9 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { AlertTriangle, Trash2, X } from "lucide-react"
+
+import type { Destination } from "@/types/destination"
 
 import { Button } from "@/components/ui/button"
 
@@ -14,7 +17,27 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 
-const DeleteDestinationDialog = () => {
+const DeleteDestinationDialog = ({
+  destination,
+}: {
+  destination: Destination
+}) => {
+  const router = useRouter()
+
+  const handleDelete = async () => {
+    const res = await fetch(
+      `http://localhost:8000/destination/${destination._id}`,
+      {
+        method: "DELETE",
+      }
+    )
+
+    const data = await res.json()
+    console.log(data)
+
+    router.push("/destinations")
+  }
+
   return (
     <Dialog>
       <DialogTrigger className="inline-flex h-10 items-center gap-2 rounded-xl border border-red-200 bg-white px-4 text-sm font-medium text-red-500 transition-all hover:border-red-300 hover:bg-red-50">
@@ -52,6 +75,7 @@ const DeleteDestinationDialog = () => {
             type="button"
             variant="destructive"
             className="h-11 rounded-xl px-5 text-sm font-semibold"
+            onClick={handleDelete}
           >
             <Trash2 className="size-4" />
             Yes, Delete

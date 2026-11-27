@@ -9,6 +9,7 @@ import {
   Plus,
   Wallet,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -107,15 +108,6 @@ export function AddPackageForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const res = await fetch(`http://localhost:8000/add-destination`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(draft),
-    })
-    const data = await res.json()
-    console.log(data)
     setAttempted(true)
 
     if (errorCount > 0) {
@@ -125,15 +117,33 @@ export function AddPackageForm() {
       return
     }
 
-    setSubmitted({
+    const payload = {
       ...draft,
       name: draft.name.trim(),
       country: draft.country.trim(),
       duration: draft.duration.trim(),
       imageUrl: draft.imageUrl.trim(),
       description: draft.description.trim(),
-    })
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8000/add-destination`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error)
+        return
+      }
+
+      setSubmitted(payload)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch {
+      toast.error("Server error. Please try again later")
+    }
   }
 
   function resetForm() {
@@ -267,6 +277,7 @@ export function AddPackageForm() {
                   aria-invalid={Boolean(nameError)}
                   aria-describedby={nameError ? "name-error" : undefined}
                   className={controlClass}
+                  required
                 />
                 {nameError ? (
                   <FieldError id="name-error">{nameError}</FieldError>
@@ -288,6 +299,7 @@ export function AddPackageForm() {
                   aria-invalid={Boolean(countryError)}
                   aria-describedby={countryError ? "country-error" : undefined}
                   className={controlClass}
+                  required
                 />
                 {countryError ? (
                   <FieldError id="country-error">{countryError}</FieldError>
@@ -306,6 +318,7 @@ export function AddPackageForm() {
                     markTouched("category")
                   }}
                   name="category"
+                  required
                 >
                   <SelectTrigger
                     id="category"
@@ -370,6 +383,7 @@ export function AddPackageForm() {
                     $
                   </span>
                   <Input
+                    required
                     id="price"
                     name="price"
                     type="number"
@@ -398,6 +412,7 @@ export function AddPackageForm() {
                   Departure date <span className="text-brand">*</span>
                 </FieldLabel>
                 <Input
+                  required
                   id="departure"
                   name="departure"
                   type="date"

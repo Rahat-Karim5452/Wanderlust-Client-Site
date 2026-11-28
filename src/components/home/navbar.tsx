@@ -3,10 +3,11 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { Menu, User, X } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LogOut, Menu, User, X } from "lucide-react"
 
 import logo from "@/assets/Wanderlust.png"
+import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 const primaryLinks = [
@@ -24,7 +25,17 @@ const accountLinks = [
 
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [open, setOpen] = React.useState(false)
+  const { data: session, isPending } = authClient.useSession()
+  const user = session?.user
+
+  async function handleSignOut() {
+    setOpen(false)
+    await authClient.signOut()
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <header className="relative z-30 border-b border-black/5 bg-white">
@@ -81,22 +92,45 @@ export function Navbar() {
           </Link>
 
           <div className="hidden items-center justify-end gap-8 lg:flex">
-            <Link
-              href="#profile"
-              className="inline-flex items-center gap-1 text-base font-medium tracking-[0.08px] text-[#0c0b0b] transition-colors hover:text-brand"
-            >
-              <User className="size-4" aria-hidden="true" />
-              Profile
-            </Link>
-            {accountLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className="text-base font-medium tracking-[0.08px] text-[#0c0b0b] transition-colors hover:text-brand"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {isPending ? (
+              <span
+                aria-hidden="true"
+                className="h-4 w-24 animate-pulse rounded bg-black/10"
+              />
+            ) : user ? (
+              <>
+                <Link
+                  href="/profile"
+                  aria-current={pathname === "/profile" ? "page" : undefined}
+                  className={cn(
+                    "inline-flex items-center gap-1 text-base font-medium tracking-[0.08px] text-[#0c0b0b] transition-colors hover:text-brand",
+                    pathname === "/profile" &&
+                      "text-brand underline decoration-1 underline-offset-4"
+                  )}
+                >
+                  <User className="size-4" aria-hidden="true" />
+                  Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="inline-flex items-center gap-1 text-base font-medium tracking-[0.08px] text-[#0c0b0b] transition-colors hover:text-brand"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              accountLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-base font-medium tracking-[0.08px] text-[#0c0b0b] transition-colors hover:text-brand"
+                >
+                  {link.label}
+                </Link>
+              ))
+            )}
           </div>
 
           <div className="justify-self-end lg:hidden" />
@@ -120,24 +154,46 @@ export function Navbar() {
               </Link>
             ))}
             <div className="my-2 h-px bg-black/10" />
-            <Link
-              href="#profile"
-              onClick={() => setOpen(false)}
-              className="inline-flex items-center gap-1 py-3 text-base font-medium tracking-[0.08px] text-[#0c0b0b]"
-            >
-              <User className="size-4" aria-hidden="true" />
-              Profile
-            </Link>
-            {accountLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="py-3 text-base font-medium tracking-[0.08px] text-[#0c0b0b]"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {isPending ? (
+              <span
+                aria-hidden="true"
+                className="my-3 h-4 w-28 animate-pulse rounded bg-black/10"
+              />
+            ) : user ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setOpen(false)}
+                  aria-current={pathname === "/profile" ? "page" : undefined}
+                  className={cn(
+                    "inline-flex items-center gap-1 py-3 text-base font-medium tracking-[0.08px] text-[#0c0b0b]",
+                    pathname === "/profile" && "text-brand"
+                  )}
+                >
+                  <User className="size-4" aria-hidden="true" />
+                  Profile
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="inline-flex items-center gap-1 py-3 text-left text-base font-medium tracking-[0.08px] text-[#0c0b0b]"
+                >
+                  <LogOut className="size-4" aria-hidden="true" />
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              accountLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="py-3 text-base font-medium tracking-[0.08px] text-[#0c0b0b]"
+                >
+                  {link.label}
+                </Link>
+              ))
+            )}
           </nav>
         </div>
       )}

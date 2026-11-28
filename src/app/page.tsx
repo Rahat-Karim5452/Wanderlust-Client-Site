@@ -1,9 +1,9 @@
-import { Banner } from "@/components/banner"
-import { CallToAction } from "@/components/cta"
+import { Banner } from "@/components/home/banner"
+import { CallToAction } from "@/components/home/cta"
 import { FeaturedDestinations } from "@/components/destinations/featured-destinations"
 
-import { Testimonials } from "@/components/testimonials"
-import { WhyChoose } from "@/components/why-choose"
+import { Testimonials } from "@/components/home/testimonials"
+import { WhyChoose } from "@/components/home/why-choose"
 
 export default function Page() {
   return (

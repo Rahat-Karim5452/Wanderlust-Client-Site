@@ -5,6 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogOut, Menu, User, X } from "lucide-react"
+import { toast } from "sonner"
 
 import logo from "@/assets/Wanderlust.png"
 import { authClient } from "@/lib/auth-client"
@@ -14,7 +15,7 @@ const primaryLinks = [
   { label: "Home", href: "/" },
   { label: "Destinations", href: "/destinations" },
   { label: "Add-Destination", href: "/add-destination" },
-  { label: "My Bookings", href: "/bookings" },
+  { label: "My Bookings", href: "/my-booking" },
   { label: "Admin", href: "/admin" },
 ]
 
@@ -33,6 +34,7 @@ export function Navbar() {
   async function handleSignOut() {
     setOpen(false)
     await authClient.signOut()
+    toast.success("Signed out")
     router.push("/")
     router.refresh()
   }

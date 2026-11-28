@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Lock, Mail, User } from "lucide-react"
+import { toast } from "sonner"
 import { AuthField } from "@/components/auth/auth-field"
 import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
@@ -56,6 +57,7 @@ export function SignupForm() {
         return
       }
 
+      toast.success("Account created. Welcome to Wanderlust!")
       router.push("/")
       router.refresh()
     } catch {

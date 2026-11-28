@@ -18,6 +18,7 @@ import { formatPrice } from "@/lib/destinations"
 
 import EditDestinationDialog from "@/components/destinations/edit-destination-dialog"
 import DeleteDestinationDialog from "@/components/destinations/delete-destination-dialog"
+import BookingCard from "@/components/booking/BookingCard"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"
 
@@ -225,84 +226,7 @@ const DestinationDetailsPage = async ({
           </div>
 
           {/* Booking Card */}
-          <aside className="lg:sticky lg:top-8">
-            <div className="overflow-hidden rounded-3xl border border-black/5 bg-white shadow-[0_20px_55px_-30px_rgba(12,11,11,0.25)]">
-              <div className="bg-gradient-to-br from-[#effaff] to-white p-6 sm:p-7">
-                <p className="text-xs font-semibold tracking-widest text-[#819095] uppercase">
-                  Starting from
-                </p>
-
-                <p className="mt-2 text-4xl font-bold tracking-tight text-brand">
-                  {formatPrice(price)}
-                </p>
-
-                <p className="mt-1 text-xs text-[#819095]">Per person</p>
-
-                <div className="my-6 h-px bg-brand/10" />
-
-                <div className="space-y-5">
-                  <div>
-                    <p className="text-xs text-[#819095]">Destination</p>
-                    <p className="mt-1 text-sm font-semibold">{name}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-[#819095]">Travel date</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
-                      <CalendarDays className="size-4 text-brand" />
-                      {departure}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-[#819095]">Trip duration</p>
-                    <p className="mt-1 flex items-center gap-2 text-sm font-semibold">
-                      <Clock3 className="size-4 text-brand" />
-                      {duration}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-7 space-y-3">
-                  {[
-                    "Destination details available",
-                    "Transparent package pricing",
-                    "Easy trip planning",
-                  ].map((benefit) => (
-                    <div
-                      key={benefit}
-                      className="flex items-center gap-2 text-xs text-[#64757a]"
-                    >
-                      <Check className="size-4 text-emerald-500" />
-                      {benefit}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Booking Actions */}
-              <div className="border-t border-black/5 p-6">
-                <Link
-                  href={`/booking/${_id}`}
-                  className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white shadow-[0_12px_25px_-12px_rgba(21,161,191,0.8)] transition-all hover:-translate-y-0.5 hover:bg-[#1290ab]"
-                >
-                  Book Now
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-
-                <Link
-                  href="/destinations"
-                  className="mt-3 flex h-11 w-full items-center justify-center rounded-xl border border-black/10 text-sm font-medium text-[#64757a] transition-all hover:border-brand/30 hover:bg-[#eff9fc] hover:text-brand"
-                >
-                  Explore More Destinations
-                </Link>
-
-                <p className="mt-4 text-center text-[11px] text-[#9aa6aa]">
-                  Your next adventure is just a step away.
-                </p>
-              </div>
-            </div>
-          </aside>
+          <BookingCard destination={destination} />
         </div>
       </div>
     </main>

@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Lock, Mail } from "lucide-react"
+import { toast } from "sonner"
 
 import { AuthField } from "@/components/auth/auth-field"
 import { GitHubIcon, GoogleIcon } from "@/components/auth/social-icons"
@@ -45,6 +46,7 @@ export function LoginForm() {
       return
     }
 
+    toast.success("Welcome back!")
     router.push("/")
     router.refresh()
   }

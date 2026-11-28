@@ -1,13 +1,21 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowUpRight, CalendarDays, Compass, MapPin } from "lucide-react"
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Clock3,
+  Compass,
+  MapPin,
+} from "lucide-react"
 
 import { formatPrice } from "@/lib/destinations"
+import { formatDeparture } from "@/lib/packages"
 import type { Destination } from "@/types/destination"
 
 export function DestinationCard({ destination }: { destination: Destination }) {
-  const { _id, name, country, category, price, duration, imageUrl } =
+  const { _id, name, country, category, price, duration, departure, imageUrl } =
     destination
+  const departureLabel = formatDeparture(departure)
 
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-black/5 bg-white shadow-[0_18px_44px_-28px_rgba(12,11,11,0.35)] transition-all duration-300 hover:-translate-y-1.5 hover:border-brand/20 hover:shadow-[0_28px_60px_-28px_rgba(21,161,191,0.45)]">
@@ -51,10 +59,20 @@ export function DestinationCard({ destination }: { destination: Destination }) {
           {name}
         </h2>
 
-        <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#eff9fc] px-3 py-1 text-xs font-medium text-[#3d6b78] ring-1 ring-brand/10">
-          <CalendarDays className="size-3.5 text-brand" aria-hidden />
-          {duration}
-        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#eff9fc] px-3 py-1 text-xs font-medium text-[#3d6b78] ring-1 ring-brand/10">
+            <Clock3 className="size-3.5 text-brand" aria-hidden />
+            {duration}
+          </p>
+
+          {departureLabel ? (
+            <p className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#eff9fc] px-3 py-1 text-xs font-medium text-[#3d6b78] ring-1 ring-brand/10">
+              <CalendarDays className="size-3.5 text-brand" aria-hidden />
+              <span className="sr-only">Departs </span>
+              {departureLabel}
+            </p>
+          ) : null}
+        </div>
 
         <div className="mt-auto flex items-end justify-between gap-4 border-t border-dashed border-black/10 pt-5">
           <div className="mt-5">

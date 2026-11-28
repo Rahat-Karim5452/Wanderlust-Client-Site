@@ -4,59 +4,15 @@ import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Lock, Mail, User } from "lucide-react"
-
+import { AuthField } from "@/components/auth/auth-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
 import { GitHubIcon, GoogleIcon } from "./social-icons"
 
-const fieldClass =
-  "h-11 rounded-lg border-black/10 bg-[#f7fafc] pl-10 text-sm text-[#0c0b0b] shadow-none placeholder:text-[#8a999e] focus-visible:border-brand focus-visible:bg-white focus-visible:ring-brand/20 dark:border-black/10 dark:bg-[#f7fafc] dark:focus-visible:bg-white"
-
 const socialButtonClass =
   "h-11 w-full justify-center gap-2 rounded-lg border-black/10 bg-white text-sm font-medium text-[#25363b] shadow-none hover:border-brand/30 hover:bg-[#eff9fc] hover:text-brand dark:border-black/10 dark:bg-white dark:text-[#25363b] dark:hover:border-brand/30 dark:hover:bg-[#eff9fc] dark:hover:text-brand"
-
-function Field({
-  id,
-  label,
-  icon: Icon,
-  type = "text",
-  autoComplete,
-  placeholder,
-}: {
-  id: string
-  label: string
-  icon: React.ElementType
-  type?: string
-  autoComplete: string
-  placeholder: string
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id} className="text-sm font-medium text-[#0c0b0b]">
-        {label}
-      </Label>
-      <div className="relative">
-        <Icon
-          aria-hidden="true"
-          className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[#8a999e]"
-        />
-        <Input
-          id={id}
-          name={id}
-          type={type}
-          required
-          autoComplete={autoComplete}
-          placeholder={placeholder}
-          className={fieldClass}
-        />
-      </div>
-    </div>
-  )
-}
 
 export function SignupForm() {
   const router = useRouter()
@@ -68,6 +24,7 @@ export function SignupForm() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     setError(null)
 
     const formData = new FormData(event.currentTarget)
@@ -87,40 +44,49 @@ export function SignupForm() {
     }
 
     setSubmitting(true)
-    const { error: signUpError } = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    })
-    setSubmitting(false)
+    try {
+      const { error: signUpError } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+      })
 
-    if (signUpError) {
-      setError(signUpError.message ?? "Could not create your account.")
-      return
+      if (signUpError) {
+        setError(signUpError.message ?? "Could not create your account.")
+        return
+      }
+
+      router.push("/")
+      router.refresh()
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
+      setSubmitting(false)
     }
-
-    router.push("/")
-    router.refresh()
   }
 
   async function handleSocial(provider: "google" | "github") {
     setError(null)
     setSocialLoading(provider)
 
-    const { error: socialError } = await authClient.signIn.social({
-      provider,
-      callbackURL: "/",
-    })
+    try {
+      const { error: socialError } = await authClient.signIn.social({
+        provider,
+        callbackURL: "/",
+      })
 
-    if (socialError) {
-      setError(
-        socialError.message ??
-          `Could not continue with ${provider === "google" ? "Google" : "GitHub"}.`
-      )
+      if (socialError) {
+        setError(
+          socialError.message ??
+            `Could not continue with ${provider === "google" ? "Google" : "GitHub"}.`
+        )
+      }
+    } catch {
+      setError("Something went wrong. Please try again.")
+    } finally {
       setSocialLoading(null)
     }
   }
-
   return (
     <div>
       {error ? (
@@ -133,7 +99,7 @@ export function SignupForm() {
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <Field
+        <AuthField
           id="full-name"
           label="Full Name"
           icon={User}
@@ -141,7 +107,7 @@ export function SignupForm() {
           placeholder="Enter your name"
         />
 
-        <Field
+        <AuthField
           id="email"
           label="Email Address"
           icon={Mail}
@@ -150,7 +116,7 @@ export function SignupForm() {
           placeholder="Enter your email"
         />
 
-        <Field
+        <AuthField
           id="password"
           label="Password"
           icon={Lock}
@@ -159,7 +125,7 @@ export function SignupForm() {
           placeholder="Create a password"
         />
 
-        <Field
+        <AuthField
           id="confirm-password"
           label="Confirm Password"
           icon={Lock}

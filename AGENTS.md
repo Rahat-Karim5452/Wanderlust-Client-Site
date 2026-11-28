@@ -13,7 +13,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Frontend only: destinations are served by a **separate REST backend**, not this repo. `NEXT_PUBLIC_API_URL` (default `http://127.0.0.1:8000`) must be running for `/`, `/destinations`, and `/destinations/[id]` to show data; otherwise they render an empty/error state.
 - Endpoints in use: `GET /destinations`, `GET /destination/:id`, `POST /add-destination`, `PATCH /destination/:id`, `DELETE /destination/:id`. Detail responses may be `{ destination }` or the bare object (`page.tsx` handles both).
 - Server fetches use `NEXT_PUBLIC_API_URL`; client mutations **hardcode `http://localhost:8000`** in `add-package-form.tsx`, `edit-destination-dialog.tsx`, and `delete-destination-dialog.tsx`. Update all three if the API base changes.
-- Existing routes: `/`, `/destinations`, `/destinations/[id]`, `/add-destination`, `/signup`, `/api/auth/[...all]`. The navbar links to `/bookings`, `/admin`, `/login`, and the detail page links to `/booking/[id]` — none of those routes exist yet.
+- Existing routes: `/`, `/destinations`, `/destinations/[id]`, `/add-destination`, `/signup`, `/login`, `/api/auth/[...all]`. The navbar links to `/bookings` and `/admin`, the login page links to `/forgot-password`, and the detail page links to `/booking/[id]` — none of those routes exist yet.
 - Next 16 route params are async: type them as `Promise<{ id: string }>` and `await params` (see `src/app/destinations/[id]/page.tsx`).
 
 ## Commands
@@ -38,6 +38,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Auth
 
-- `better-auth` with the MongoDB adapter (`src/lib/auth.ts`), mounted at `src/app/api/auth/[...all]/route.ts`; the browser client is `src/lib/auth-client.ts`, used by the `/signup` form (`src/components/auth/signup-form.tsx`) for email/password and Google/GitHub social sign-up.
+- `better-auth` with the MongoDB adapter (`src/lib/auth.ts`), mounted at `src/app/api/auth/[...all]/route.ts`; the browser client is `src/lib/auth-client.ts`, used by the `/signup` and `/login` forms (`src/components/auth/*-form.tsx`) for email/password and Google/GitHub social auth.
 - `src/lib/auth.ts` opens a Mongo client at import time, so importing it requires `MONGODB_URI`. Env vars: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `MONGODB_URI`; social login also references `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` and `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
+- Account linking is configured to trust `google`/`github` and set `requireLocalEmailVerified: false`, so social sign-in can attach to an existing email/password account. This is a deliberate tradeoff until email verification exists; don't remove it without adding a verification flow.
 - `.env*` is gitignored and there is no `.env.example`; read variable names from the code, never commit values.
